@@ -1,0 +1,84 @@
+{% extends "blog/base.html" %}
+{% load social_share %}
+{% block content %}
+
+    <article class="media content-section">
+        <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}" alt="">
+        <div class="media-body">
+            <div class="article-metadata">
+                <img src="{{ object.author.profile.image }}" alt="">
+                <a class="mr-2" href="{%  url 'user-profile' post.author.profile.pk %}">{{ object.author }}</a>
+                <small class="text-muted">{{ object.date_posted|date:"M d, Y"}}</small>
+                {% if object.author == user %}
+                    <div>
+                        <a class="btn btn-secondary bt-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Update</a>
+                        <a class="btn btn-danger bt-sm mt-1 mb-1" href="{% url 'post-delete' object.id %}">Delete</a>
+                    </div>
+                {% endif %}
+            </div>
+            <h2><a class="article-title" href="{% url 'post-detail' post.pk%}">{{ object.title }}</a></h2>
+            <p class="article-content">{{ object.content }}</p>
+                <div class="flex-container">
+                    <div class="row">
+                        <div class="col">
+                            {% if liked %}
+                                <form method="POST" action="{% url 'like-post' object.pk %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger" type="submit">Unlike</button>
+                                </form>
+
+                            {% else %}
+                                <form method="POST" action="{% url 'like-post' object.pk %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-primary" type="submit">Like</button>
+                                </form>
+                            {% endif %}
+                            <p class="fs-1">{{ post.total_likes }}</p>
+                        </div>
+                        <div class="col d-flex justify-content-end align-self-center">
+                            <div>
+                                {% post_to_facebook object_or_url '<i class="fab fa-facebook-f fa-2x mr-3"></i>'%}
+                            </div>
+                            <div>
+                                {% post_to_whatsapp object_or_url '<i class="fab fa-whatsapp fa-2x mr-3"></i>'%}
+                            </div>
+                            <div>
+                                {% post_to_twitter "" object_or_url '<i class="fab fa-twitter fa-2x mr-3"></i>'%}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </article>
+    {% if comments %}
+        <h3>Comments</h3>
+        {% for comment in comments %}
+            <article class="media content-section" >
+                <img class="rounded-circle article-img" src="{{ comment.author.profile.image.url }}" alt="">
+                <div class="media-body">
+                    <div class="article-metadata">
+                        <a class="mr-2" href="{%  url 'user-profile' post.author.profile.pk %}">{{ post.author }}</a>
+                        <small class="text-muted">{{ comment.date_posted|date:"M d, Y"}}</small>
+                        {% if comment.author == user %}
+                            <div>
+                                <a class="btn btn-secondary bt-sm mt-1 mb-1" href="{% url 'comment-update' comment.pk %}">Update</a>
+                                <a class="btn btn-danger bt-sm mt-1 mb-1" href="{% url 'comment-delete' comment.pk %}">Delete</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <p class="article-content">{{ comment.content }}</p>
+                </div>
+            </article>
+        {% endfor %}
+    {% endif %}
+    <form method='POST' action="{% url 'add-comment' post.pk %}">
+        {% csrf_token %}
+        <h3>Leave a comment</h3>
+        <div class="form-group ">
+          <span class="ml-2"></span>{{ comment_form.content}}
+        </div>
+        <button class="btn btn-primary ml-2" type="submit">Reply</button>
+    </form>
+
+{% endblock %}
+
